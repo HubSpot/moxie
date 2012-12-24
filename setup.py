@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 from moxie import __version__
 
-setup(name='moxie',
+setup(name='moxie-proxy',
     version=__version__,
     description='Easy MySQL OSX proxy',
     author='Tom Petr',
