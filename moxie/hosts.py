@@ -20,6 +20,14 @@ def list_hosts():
     return dict(results)
 
 
+def status(domain, address):
+    return get(domain) == address
+
+
+def get(domain):
+    return list_hosts().get(domain)
+
+
 def add(domain, address):
     if domain not in list_hosts():
         with closing(open('/etc/hosts', 'a')) as fp:
@@ -27,14 +35,6 @@ def add(domain, address):
         logging.debug("Mapped '%s' to '%s'", domain, address)
     else:
         logging.debug("Domain '%s' already maps to '%s'", domain, get(domain))
-
-
-def status(domain, address):
-    return get(domain) == address
-
-
-def get(domain):
-    return list_hosts().get(domain)
 
 
 def remove(domain):

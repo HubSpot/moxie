@@ -3,6 +3,9 @@ from contextlib import closing
 
 
 def generate_address_from_index(index):
+    # we add 2 because:
+    # - 127.0.0.0 isn't a valid address
+    # - 127.0.0.1 is already taken
     return "127.0.0.{0}".format(index + 2)
 
 

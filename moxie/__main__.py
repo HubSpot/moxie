@@ -2,8 +2,8 @@
 """
 
 Usage:
-  moxie on [<hosts>...] [options]
-  moxie off [<hosts>...] [options]
+  moxie start [<hosts>...] [options]
+  moxie stop [<hosts>...] [options]
   moxie status [options]
 
 Options:

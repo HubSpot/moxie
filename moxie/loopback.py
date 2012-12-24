@@ -4,6 +4,9 @@ from sh import ifconfig
 
 RE_LOOPBACK_ADDRESS = re.compile(r'^\s+inet (.*?) netmask .*$')
 
+add_lo0_alias = ifconfig.lo0.bake('alias')
+remove_lo0_alias = ifconfig.lo0.bake('-alias')
+
 
 def list_addresses():
     addresses = []
@@ -17,16 +20,15 @@ def list_addresses():
 
 def add(address):
     if address not in list_addresses():
-        ifconfig.lo0('alias', address)
+        add_lo0_alias(address)
         logging.debug("Added loopback address '%s'", address)
     else:
         logging.debug("Loopback address '%s' already exists", address)
 
 
 def remove(address):
-    address = unicode(address)
     if address in list_addresses():
-        ifconfig.lo0('-alias', address)
+        remove_lo0_alias(address)
         logging.debug("Removed loopback address '%s'", address)
     else:
         logging.debug("Loopback address '%s' does not exist", address)
