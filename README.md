@@ -114,3 +114,8 @@ Yes, it does.
 ## Gotchas
 
 Loopback address aliases and ssh tunnels won't survive reboots, but changes to /etc/hosts will.
+
+## Tested on
+
+ - OSX 10.7.5
+ - Ubuntu 12.10
