@@ -2,9 +2,11 @@
 """
 
 Usage:
-  moxie start [<hosts>...] [options]
-  moxie stop [<hosts>...] [options]
+  moxie start [<destinations>...] [options]
+  moxie stop [<destinations>...] [options]
   moxie status [options]
+  moxie add <destination> [<ports>...] [--proxy=<proxy>] [options]
+  moxie remove <destination> [options]
 
 Options:
   -c --config=<config>      Configuration file [default: ~/.moxie.yaml]

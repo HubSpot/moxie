@@ -1,6 +1,8 @@
 import yaml
 from contextlib import closing
 
+from .route import Route
+
 
 def generate_address_from_index(index):
     # we add 2 because:
@@ -9,23 +11,9 @@ def generate_address_from_index(index):
     return "127.0.0.{0}".format(index + 2)
 
 
-class Route(object):
-    def __init__(self, destination, local_address, ports, proxy):
-        self.destination = destination
-        self.local_address = local_address
-        self.ports = ports
-        self.proxy = proxy
-
-    def is_valid(self):
-        return self.destination and self.proxy and len(self.ports) > 0
-
-    def __repr__(self):
-        return "<Route {0} --> {1} via {2}>".format(self.local_address, self.destination, self.proxy)
-
-
 class Config(object):
     @classmethod
-    def from_yaml(cls, filename):
+    def load(cls, filename):
         with closing(open(filename, 'r')) as fp:
             data = yaml.load(fp)
 
@@ -51,3 +39,60 @@ class Config(object):
         self.routes = routes
         self.default_proxy = default_proxy
         self.default_ports = default_ports
+
+    def add_route(self, destination, ports=None, proxy=None):
+        index = len(self.routes)
+
+        # see if we can update
+        for route in self.routes:
+            if route.destination == destination:
+                route.ports = list(set(route.ports).union(ports or []))
+
+                if proxy:
+                    route.proxy = proxy
+
+                return route.is_valid()
+
+        # otherwise create
+        route = Route(
+            local_address=generate_address_from_index(index),
+            destination=destination,
+            ports=ports or self.default_ports,
+            proxy=proxy or self.default_proxy
+        )
+
+        if route.is_valid():
+            self.routes.append(route)
+            return True
+        else:
+            return False
+
+    def remove_route(self, destination):
+        for route in self.routes:
+            if route.destination == destination:
+                route.stop()
+                self.routes.remove(route)
+                return True
+
+        return False
+
+    def __getstate__(self):
+        output = {
+            'routes': [route.__getstate__() for route in self.routes],
+        }
+
+        defaults = {}
+
+        if self.default_proxy:
+            defaults['proxy'] = self.default_proxy
+        if self.default_ports:
+            defaults['ports'] = self.default_ports
+
+        if defaults:
+            output['defaults'] = defaults
+
+        return output
+
+    def save(self, filename):
+        with closing(open(filename, 'w')) as fp:
+            fp.write(yaml.dump(self.__getstate__()))

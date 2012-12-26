@@ -2,9 +2,6 @@ import os
 import logging
 from termcolor import colored
 
-from . import loopback
-from . import hosts
-from . import tunnel
 from .config import Config
 
 
@@ -22,36 +19,22 @@ def init_logging(args):
 
 
 def check_status(config):
-    # enumerate loopback addresses
-    addresses = loopback.list_addresses()
-
     # calculate max host and port width for alignment
     width = max([len("{0}:{1}".format(r.destination, port)) for r in config.routes for port in r.ports])
 
     # check status of routes
     for route in config.routes:
-        has_address = route.local_address in addresses
-        hosts_mapping = hosts.get(route.destination)
-
         for port in route.ports:
-            is_tunnel_running = tunnel.status(route.local_address, port, route.destination, route.proxy)
-
-            message = ''
-
-            if not has_address and not is_tunnel_running and hosts_mapping != route.local_address:
-                message = 'OFF'
-            elif not has_address:
-                message = "{0} (missing loopback address {1})".format(colored('ISSUE', 'red'), route.local_address)
-            elif not is_tunnel_running:
-                message = "{0} (ssh tunnel not running)".format(colored('ISSUE', 'red'))
-            elif hosts_mapping != route.local_address:
-                message = "{0} ('{1}' doesn't map to '{2}')".format(colored('ISSUE', 'red'), route.destination, route.local_address)
-            else:
-                message = colored('OK', 'green')
-
             aligned_host = "{0}:{1}".format(route.destination, port).ljust(width, ' ')
 
-            print "{0} {1}".format(aligned_host, message)
+            status, issues = route.status(port)
+
+            if status is True:
+                print "{0} {1}".format(aligned_host, colored('OK', 'green'))
+            elif status is False:
+                print "{0} {1}".format(aligned_host, "OFF")
+            else:
+                print "{0} {1} ({2})".format(aligned_host, colored('ISSUE', 'red'), issues)
 
     return 0
 
@@ -60,21 +43,10 @@ def start_proxying(args, config):
     # loop through configured routes
     for route in config.routes:
         # filter by destination hostname, if specified
-        if args['<hosts>'] and route.destination not in args['<hosts>']:
+        if args['<destinations>'] and route.destination not in args['<destinations>']:
             continue
 
-        # ensure local address exists
-        loopback.add(route.local_address)
-
-        # start ssh tunnel(s)
-        for port in route.ports:
-            tunnel.start(route.local_address, port, route.destination, route.proxy)
-
-        # add domain to /etc/hosts
-        hosts.add(route.destination, route.local_address)
-
-        # log info
-        logging.info("Proxying %s:%s through %s", route.destination, ','.join(map(str, route.ports)), route.proxy)
+        route.start()
 
     return 0
 
@@ -83,27 +55,48 @@ def stop_proxying(args, config):
     # loop through configured routes
     for route in config.routes:
         # filter by destination hostname, if specified
-        if args['<hosts>'] and route.destination not in args['<hosts>']:
+        if args['<destinations>'] and route.destination not in args['<destinations>']:
             continue
 
-        # remove loopback address
-        loopback.remove(route.local_address)
+        route.stop()
 
-        # stop ssh tunnel(s)
-        for port in route.ports:
-            tunnel.stop(route.local_address, port, route.destination, route.proxy)
+    return 0
 
-        # remove domain from /etc/hosts
-        hosts.remove(route.destination)
 
-        logging.info("Stopped proxying %s:%s through %s", route.destination, ','.join(map(str, route.ports)), route.proxy)
+def add_destination(args, config):
+    result = config.add_route(
+        destination=args['<destination>'],
+        ports=map(int, args['<ports>']),
+        proxy=args['--proxy']
+    )
+
+    if result:
+        config.save(os.path.expanduser(args['--config']))
+        return 0
+    else:
+        return 1
+
+
+def remove_destination(args, config):
+    result = config.remove_route(args['<destination>'])
+
+    if result:
+        config.save(os.path.expanduser(args['--config']))
+        return 0
+    else:
+        return 1
 
 
 def main(args):
     init_logging(args)
 
     # load config file
-    config = Config.from_yaml(os.path.expanduser(args['--config']))
+    config = Config.load(os.path.expanduser(args['--config']))
+
+    if args['add']:
+        return add_destination(args, config)
+    elif args['remove']:
+        return remove_destination(args, config)
 
     # bail out if no routes configured
     if len(config.routes) == 0:
