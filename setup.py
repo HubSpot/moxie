@@ -1,5 +1,6 @@
 from setuptools import setup, find_packages
 from moxie import __version__
+from moxie import __platforms__
 
 setup(name='moxie-proxy',
     version=__version__,
@@ -21,5 +22,5 @@ setup(name='moxie-proxy',
             'moxie = moxie.__main__:entry',
         ],
     },
-    platforms=["any"],
+    platforms=__platforms__,
 )

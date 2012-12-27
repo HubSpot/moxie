@@ -17,13 +17,21 @@ Options:
 """
 
 import sys
-from . import __version__
-from .core import main
+import platform
 from docopt import docopt
+
+from . import __version__
+from . import __platforms__
+
+from .core import main
 
 
 def entry():
-    return main(docopt(__doc__, version=__version__))
+    if platform.system() in __platforms__:
+        return main(docopt(__doc__, version=__version__))
+    else:
+        print "Moxie wasn't designed to run on your system, sorry."
+        return 1
 
 if __name__ == '__main__':
     sys.exit(entry())
