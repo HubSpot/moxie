@@ -1,4 +1,5 @@
 import yaml
+import os
 from contextlib import closing
 
 from .route import Route
@@ -14,6 +15,9 @@ def generate_address_from_index(index):
 class Config(object):
     @classmethod
     def load(cls, filename):
+        if not os.path.exists(filename):
+            return Config([])
+
         with closing(open(filename, 'r')) as fp:
             data = yaml.load(fp)
 
