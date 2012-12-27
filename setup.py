@@ -7,6 +7,7 @@ setup(name='moxie-proxy',
     author='Tom Petr',
     author_email='tpetr@hubspot.com',
     url='http://dev.hubspot.com/',
+    license='MIT',
     packages=find_packages(),
     install_requires=[
         'nose==1.1.2',
