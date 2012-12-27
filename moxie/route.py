@@ -1,9 +1,10 @@
-import platform
 import logging
 
-from .utils import osx_loopback
+from .utils.osx import loopback
 from .utils import tunnel
 from .utils import hosts
+
+from .utils import is_osx
 
 
 class Route(object):
@@ -18,8 +19,8 @@ class Route(object):
 
     def start(self):
         # add loopback address on OSX
-        if platform.system == 'Darwin':
-            osx_loopback.add(self.local_address)
+        if is_osx():
+            loopback.add(self.local_address)
 
         # start ssh tunnel(s)
         for port in self.ports:
@@ -32,10 +33,10 @@ class Route(object):
         logging.info("Proxying %s:%s through %s", self.destination, ','.join(map(str, self.ports)), self.proxy)
 
     def status(self, port):
-        if platform.system() == 'Darwin':
-            has_local_address = self.local_address in osx_loopback.list_addresses()
+        if is_osx():
+            has_local_address = self.local_address in loopback.list_addresses()
         else:
-            has_local_address = True
+            has_local_address = True  # linux has 127.*.*.* bound to the loopback interface, like a sir
 
         hosts_mapping = hosts.get(self.destination)
         is_tunnel_running = tunnel.status(self.local_address, port, self.destination, self.proxy)
@@ -53,8 +54,8 @@ class Route(object):
 
     def stop(self):
         # remove loopback address on OSX
-        if platform.system() == 'Darwin':
-            osx_loopback.remove(self.local_address)
+        if is_osx():
+            loopback.remove(self.local_address)
 
         # stop ssh tunnel(s)
         for port in self.ports:
