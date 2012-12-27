@@ -1,6 +1,6 @@
 # moxie
 
-A TCP proxy for OSX guaranteed to make you smile.
+A TCP proxy guaranteed to make you smile.
 
 ## What is it?
 
@@ -8,9 +8,7 @@ Moxie is a python script that helps manage SSH tunnels. In addition to creating 
 
 ## How do I install it?
 
-Clone the repo, make a virtualenv, run `pip install -r requirements.pip`
-
-More robust info coming soon...
+Clone this repo and then run `./install.sh`
 
 ## How do I use it?
 
@@ -113,7 +111,7 @@ Yes, it does.
 
 ## Gotchas
 
-Loopback address aliases and ssh tunnels won't survive reboots, but changes to /etc/hosts will.
+SSH tunnels won't survive reboots.
 
 ## Tested on
 
