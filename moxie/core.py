@@ -3,6 +3,7 @@ import logging
 from termcolor import colored
 
 from .config import Config
+from .exceptions import MoxieException
 
 
 def is_root():
@@ -27,14 +28,13 @@ def check_status(config):
         for port in route.ports:
             aligned_host = "{0}:{1}".format(route.destination, port).ljust(width, ' ')
 
-            status, issues = route.status(port)
-
-            if status is True:
-                print "{0} {1}".format(aligned_host, colored('OK', 'green'))
-            elif status is False:
-                print "{0} {1}".format(aligned_host, "OFF")
-            else:
-                print "{0} {1} ({2})".format(aligned_host, colored('ISSUE', 'red'), issues)
+            try:
+                if route.status(port):
+                    print "{0} {1}".format(aligned_host, colored('OK', 'green'))
+                else:
+                    print "{0} {1}".format(aligned_host, "OFF")
+            except MoxieException as e:
+                print "{0} {1} ({2})".format(aligned_host, colored('ISSUE', 'red'), e.message)
 
     return 0
 

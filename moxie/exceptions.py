@@ -1,0 +1,2 @@
+class MoxieException(Exception):
+    pass

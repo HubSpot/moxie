@@ -5,6 +5,7 @@ from .utils import tunnel
 from .utils import hosts
 
 from .utils import is_osx
+from .exceptions import MoxieException
 
 
 class Route(object):
@@ -42,15 +43,15 @@ class Route(object):
         is_tunnel_running = tunnel.status(self.local_address, port, self.destination, self.proxy)
 
         if not is_tunnel_running and hosts_mapping != self.local_address:
-            return (False, '')
+            return False
         elif not has_local_address:
-            return (None, "missing loopback address {0}".format(self.local_address))
+            raise MoxieException("missing loopback address {0}".format(self.local_address))
         elif not is_tunnel_running:
-            return (None, "ssh tunnel not running")
+            raise MoxieException("ssh tunnel not running")
         elif hosts_mapping != self.local_address:
-            return (None, "'{1}' doesn't map to '{2}'".format(self.destination, self.local_address))
+            raise MoxieException("'{1}' doesn't map to '{2}'".format(self.destination, self.local_address))
         else:
-            return (True, "")
+            return True
 
     def stop(self):
         # remove loopback address on OSX
