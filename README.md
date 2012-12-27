@@ -117,3 +117,7 @@ SSH tunnels won't survive reboots.
 
  - OSX 10.7.5
  - Ubuntu 12.10
+
+## License
+
+The code is licensed under the MIT license.
