@@ -19,7 +19,7 @@ class Config(object):
             return Config([])
 
         with closing(open(filename, 'r')) as fp:
-            data = yaml.load(fp)
+            data = yaml.load(fp) or {}
 
             defaults = data.get('defaults', {})
             default_proxy = defaults.get('proxy')

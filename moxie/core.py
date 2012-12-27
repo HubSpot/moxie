@@ -64,10 +64,29 @@ def stop_proxying(args, config):
 
 
 def add_destination(args, config):
+    if not config.default_proxy and not args['--proxy']:
+        print "No proxy specified. Include a --proxy argument, or set a default proxy in your moxie config!"
+        return 1
+
+    if not config.default_ports and not args['<ports>']:
+        print "No ports specified. Include port(s) in the command line, or set default ports in your moxie config!"
+        return 1
+
+    try:
+        int_ports = map(int, args['<ports>'])
+    except:
+        print "Invalid ports: {0}".format(args['<ports>'])
+        return 1
+
+    if len(args['--proxy']) > 0:
+        proxy = args['--proxy'][0]
+    else:
+        proxy = None
+
     result = config.add_route(
         destination=args['<destination>'],
-        ports=map(int, args['<ports>']),
-        proxy=args['--proxy']
+        ports=int_ports,
+        proxy=proxy
     )
 
     if result:
@@ -93,6 +112,7 @@ def main(args):
     # load config file
     config = Config.load(os.path.expanduser(args['--config']))
 
+    # handle adding / removing routes
     if args['add']:
         return add_destination(args, config)
     elif args['remove']:
@@ -107,7 +127,7 @@ def main(args):
     if args['status']:
         return check_status(config)
 
-    # commands other than status require root, check for it
+    # all other commands require root, check for it
     if not is_root():
         logging.error("Need to run as root")
         return 1
