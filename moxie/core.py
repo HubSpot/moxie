@@ -116,6 +116,10 @@ def main(args):
     if args['add']:
         return add_destination(args, config)
     elif args['remove']:
+        # removing a route requires root, since we might be shutting things down.
+        if not is_root():
+            logging.error("Need to run as root")
+            return 1
         return remove_destination(args, config)
 
     # bail out if no routes configured
