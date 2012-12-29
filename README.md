@@ -1,16 +1,16 @@
-# moxie
+# moxie: A TCP proxy guaranteed to make you smile.
 
-A TCP proxy guaranteed to make you smile.
+v0.2
 
 ## What is it?
 
-Moxie is a python script that helps manage "transparent" SSH tunnels.
+Moxie is a python script that helps manage SSH tunnels. It also fiddles with networking settings to make the tunnel(s) appear transparent to the end user.
 
 ## How do I install it?
 
-Clone this repo and then run `./install.sh`.
+Clone this repository and then run `./install.sh`.
 
-We will be publshing it to the public PyPI soon.
+We will be publishing moxie to the public PyPI soon.
 
 ## How do I use it?
 
@@ -76,17 +76,21 @@ Let's say we wanted to connect to a MySQL databse on db.foo.com. Db.foo.com is b
  - `-f` means run this command in the background
  - `tom@test.foo.com` means connect to test.foo.com as user "tom"
  - `-L 3306:db.foo.com:3306` means forward any local traffic on port 3306 to port 3306 on db.foo.com
- - `-N` means don't run any commands on test.foo.com (optional, but good for safety)
+ - `-N` means don't run any commands on test.foo.com (optional, but encouraged for Good, Clean Living&trade;)
 
 Now, if you connect to port 3306 on your own machine, the traffic will be proxied through test.foo.com to db.foo.com. Life is good.
 
-But what if you had multiple firewalled database hosts you needed to connect to? Sure, you could tweak the script so that 3306 would proxy to the first database, 3307 would proxy to the next, etc..., but that's a pain in the ass. There is a better way.
+But what if you had multiple firewalled database hosts you needed to connect to? Sure, you could tweak the script so that 3306 would proxy to the first database, 3307 would proxy to the next, etc..., but that's a pain in the ass.
+
+There is a better way.
 
 ### Multiple loopback addresses
 
-On linux OSes, you can use the ifconfig command to gather information about your network interfaces:
+**Note:** This information is specific to OSX. Most other UNIXy operating systems map 127.*.*.* to the loopback interface, rendering this step moot.
 
-```bash
+In OSX, you can use the `ifconfig` command to gather information about your network interfaces:
+
+```
 new-host:~ tpetr$ ifconfig lo0
 lo0: flags=8049<UP,LOOPBACK,RUNNING,MULTICAST> mtu 16384
     options=3<RXCSUM,TXCSUM>
@@ -95,9 +99,9 @@ lo0: flags=8049<UP,LOOPBACK,RUNNING,MULTICAST> mtu 16384
     inet6 ::1 prefixlen 128
 ```
 
-Did you know you can actually bind additional IP addresses to your loopback interface? In OSX, you can do so with the alias command:
+Did you know you can actually bind additional IP addresses to an interface via the `alias` command?
 
-```bash
+```
 new-host:~ tpetr$ sudo ifconfig lo0 alias 127.0.0.2
 Password: **********
 new-host:~ tpetr$ ifconfig lo0
@@ -109,7 +113,7 @@ lo0: flags=8049<UP,LOOPBACK,RUNNING,MULTICAST> mtu 16384
     inet 127.0.0.2 netmask 0xff000000
 ```
 
-If we combine this with the fact that ssh's -L command allows you to specify a local address to listen on, we can use this to support multiple proxies listening on the same port:
+If we combine this with the fact that ssh's -L command allows you to additionally specify a address to listen on, we can use this to support multiple tunnels listening on the same port:
 
 ```
 ssh -f tom@test.foo.com -L 127.0.0.1:3306:db1.foo.com:3306 -N
@@ -118,11 +122,9 @@ ssh -f tom@test.foo.com -L 127.0.0.2:3306:db2.foo.com:3306 -N
 
 Now, connecting to MySQL on 127.0.0.1 will proxy you to db1.foo.com, and connecting to MySQL on 127.0.0.2 will proxy you to db2.foo.com. Sweet.
 
-There's one more thing we can do to make this SUPER convenient for is.
-
 ### Tieing it all together with /etc/hosts
 
-The /etc/hosts file is a mapping of domains and IP addresses that gets checked **before** hitting DNS. Here's what a typical one looks like on OSX:
+The `/etc/hosts` file is a mapping of domains and IP addresses that gets checked **before** hitting DNS. Here's what a typical one looks like on OSX:
 
 ```
 ##
@@ -137,13 +139,17 @@ The /etc/hosts file is a mapping of domains and IP addresses that gets checked *
 fe80::1%lo0 localhost
 ```
 
-If we map db1.foo.com to 127.0.0.1 and db2.foo.com to 127.0.0.2, does that mean we could connect to them as if they were never firewalled in the first place?
+If we map db1.foo.com to 127.0.0.1 and db2.foo.com to 127.0.0.2, does that mean we could connect to them as if they were never firewalled in the first place? Yes, it does.
 
-Yes, it does.
+This is moxie in a nutshell.
 
-## Gotchas
+## Any gotchas?
 
-SSH tunnels won't survive reboots.
+ - SSH tunnels won't survive reboots, but local addresses and `/etc/hosts` tweaks will
+
+## I'd like to help out.
+
+Thanks! Please send all pull requests to tpetr@hubspot.com.
 
 ## Tested on
 
