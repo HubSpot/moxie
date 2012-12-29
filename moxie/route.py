@@ -45,11 +45,11 @@ class Route(object):
         if not is_tunnel_running and hosts_mapping != self.local_address:
             return False
         elif not has_local_address:
-            raise MoxieException("missing loopback address {0}".format(self.local_address))
+            raise MoxieException("Missing loopback address {0}".format(self.local_address))
         elif not is_tunnel_running:
-            raise MoxieException("ssh tunnel not running")
+            raise MoxieException("SSH tunnel not running")
         elif hosts_mapping != self.local_address:
-            raise MoxieException("'{1}' doesn't map to '{2}'".format(self.destination, self.local_address))
+            raise MoxieException("'{1}' doesn't map to '{2}' in /etc/hosts".format(self.destination, self.local_address))
         else:
             return True
 
