@@ -17,7 +17,7 @@ def init_logging(args):
     if hasattr(logging, args['--loglevel'].upper()):
         logging.getLogger().setLevel(getattr(logging, args['--loglevel'].upper()))
     else:
-        logging.error("No such log level '%s', defaulting to 'INFO'", args['--loglevel'])
+        sys.stderr.write("No such log level '%s', defaulting to 'INFO'\n", args['--loglevel'])
 
 
 def check_status(config):
@@ -31,11 +31,11 @@ def check_status(config):
 
             try:
                 if route.status(port):
-                    sys.stdout.write("{0} {1}".format(aligned_host, colored('OK', 'green')))
+                    sys.stdout.write("{0} {1}\n".format(aligned_host, colored('OK', 'green')))
                 else:
-                    sys.stdout.write("{0} {1}".format(aligned_host, "OFF"))
+                    sys.stdout.write("{0} {1}\n".format(aligned_host, "OFF"))
             except MoxieException as e:
-                sys.stdout.write("{0} {1} ({2})".format(aligned_host, colored('ISSUE', 'red'), e.message))
+                sys.stdout.write("{0} {1} ({2})\n".format(aligned_host, colored('ISSUE', 'red'), e.message))
 
     return 0
 
@@ -66,17 +66,17 @@ def stop_proxying(args, config):
 
 def add_destination(args, config):
     if not config.default_proxy and not args['--proxy']:
-        sys.stderr.write("No proxy specified. Include a --proxy argument, or set a default proxy in your moxie config!")
+        sys.stderr.write("No default proxy set.\n\nInclude a --proxy argument, or set a default proxy in your moxie config.\n")
         return 1
 
     if not config.default_ports and not args['<ports>']:
-        sys.stderr.write("No ports specified. Include port(s) in the command line, or set default ports in your moxie config!")
+        sys.stderr.write("No ports specified.\n\nInclude port(s) in the command line, or set default ports in your moxie config!\n")
         return 1
 
     try:
         int_ports = map(int, args['<ports>'])
     except:
-        sys.stderr.write("Invalid ports: {0}".format(args['<ports>']))
+        sys.stderr.write("Invalid ports: {0}\n".format(args['<ports>']))
         return 1
 
     if len(args['--proxy']) > 0:
@@ -92,8 +92,10 @@ def add_destination(args, config):
 
     if result:
         config.save(os.path.expanduser(args['--config']))
+        sys.stderr.write("Added route. Run \"moxie start\" to start proxying.\n")
         return 0
     else:
+        sys.stderr.write("Failed to add route.\n")
         return 1
 
 
@@ -102,8 +104,10 @@ def remove_destination(args, config):
 
     if result:
         config.save(os.path.expanduser(args['--config']))
+        sys.stderr.write("Removed route")
         return 0
     else:
+        sys.stderr.write("Failed to remove route")
         return 1
 
 
@@ -119,13 +123,13 @@ def main(args):
     elif args['remove']:
         # removing a route requires root, since we might be shutting things down.
         if not is_root():
-            logging.error("Need to run as root")
+            sys.stderr.write("This command needs to be run as root.\n")
             return 1
         return remove_destination(args, config)
 
     # bail out if no routes configured
     if len(config.routes) == 0:
-        logging.error("No routes configured")
+        sys.stderr.write("No routes configured.\n\nAdd one via the \"moxie add\" command or by editing {0}\n".format(args['--config']))
         return 1
 
     # handle status command
@@ -134,7 +138,7 @@ def main(args):
 
     # all other commands require root, check for it
     if not is_root():
-        logging.error("Need to run as root")
+        sys.stderr.write("This command needs to be run as root.\n")
         return 1
 
     # handle other commands
@@ -143,5 +147,5 @@ def main(args):
     elif args['stop']:
         return stop_proxying(args, config)
     else:
-        logging.error("Nothing to do.")  # shit.
+        sys.stderr.write("Nothing to do.\n")  # shit.
         return 1

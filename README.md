@@ -4,33 +4,65 @@ A TCP proxy guaranteed to make you smile.
 
 ## What is it?
 
-Moxie is a python script that helps manage SSH tunnels. In addition to creating the tunnel, it also tweaks your networking settings you can connect directly to the desired hostname (as if you didn't need a proxy in the first place!).
+Moxie is a python script that helps manage "transparent" SSH tunnels.
 
 ## How do I install it?
 
-Clone this repo and then run `./install.sh`
+Clone this repo and then run `./install.sh`.
+
+We will be publshing it to the public PyPI soon.
 
 ## How do I use it?
 
-Let's say you need to proxy MySQL to db1.foo.com, db2.foo.com, and db.bar.com through blah.foo.com. Paste this into `~/.moxie.yaml`:
+Run `moxie status` to check the status of your tunnels:
 
-```yaml
-routes:
-  - destination: db1.foo.com
-  - destination: db2.foo.com
-  - destination: db.bar.com
-defaults:
-  - proxy: blah.foo.com
-  - ports: [3306]
+```
+(moxie)Macintosh:moxie tpetr$ moxie status
+No routes configured.
+
+Add one via the "moxie add" command or by editing ~/.moxie.yaml
 ```
 
-Then run `sudo moxie start`.
+Let's use moxie to proxy all MySQL traffic to db1.foo.com through another host:
 
-Check the status of your proxies with `moxie status`.
+```
+(moxie)Macintosh:moxie tpetr$ moxie add db1.foo.com 3306
+No default proxy set.
 
-Finally, tear it all down with `sudo moxie stop`.
+Include a --proxy argument, or set a default proxy in your moxie config.
+```
 
-(better docs coming soon.)
+D'oh, we forgot to set a default proxy. Let's set some defaults in our `~/.moxie.yaml` file:
+
+```
+(moxie)Macintosh:moxie tpetr$ cat <<EOF > ~/.moxie.yaml
+> defaults:
+>     proxy: tpetr@myhost.foo.com
+>     ports: [3306]
+> EOF
+(moxie)Macintosh:moxie tpetr$ moxie add db1.foo.com 3306
+Added route. Run "moxie start" to start proxying.
+(moxie)Macintosh:moxie tpetr$ moxie status
+db1.foo.com:3306 OFF
+```
+
+Proxying is an art -- let us paint.
+
+```
+(moxie)Macintosh:moxie tpetr$ sudo moxie start
+Password: ********
+INFO:root:Proxying db1.foo.com:3306 through tpetr@myhost.foo.com
+(moxie)Macintosh:moxie tpetr$ moxie status
+db1.foo.com:3306 OK
+```
+
+Tearing down the proxies is as simple as a `moxie stop`:
+
+```
+(moxie)Macintosh:moxie tpetr$ sudo moxie stop
+Password: ********
+INFO:root:Stopped proxying db1.foo.com:3306 through tpetr@myhost.foo.com
+```
 
 ## Theory of Operation
 
