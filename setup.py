@@ -16,6 +16,7 @@ setup(name='moxie-proxy',
         'docopt==0.5.0',
         'termcolor==1.1.0',
         'sh==1.07',
+        'ordereddict==1.1',
     ],
     entry_points={
         'console_scripts': [

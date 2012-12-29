@@ -1,6 +1,7 @@
 import yaml
 import os
 from contextlib import closing
+from ordereddict import OrderedDict
 
 from .route import Route
 
@@ -9,12 +10,16 @@ def generate_address_from_index(index):
     # we add 2 because:
     # - 127.0.0.0 isn't a valid address
     # - 127.0.0.1 is already taken
-    return "127.0.0.{0}".format(index + 2)
+    if 1 < index + 2 < 255:
+        return "127.0.0.{0}".format(index + 2)
+    else:
+        raise IndexError
 
 
 class Config(object):
     @classmethod
     def load(cls, filename):
+        # generate blank config if file does not exist
         if not os.path.exists(filename):
             return Config([])
 
@@ -40,22 +45,26 @@ class Config(object):
             return Config(routes, default_proxy, default_ports)
 
     def __init__(self, routes, default_proxy=None, default_ports=None):
-        self.routes = routes
+        self.routes = OrderedDict()
+
+        for route in routes:
+            self.routes[route.destination] = route
+
         self.default_proxy = default_proxy
         self.default_ports = default_ports
 
     def add_route(self, destination, ports=None, proxy=None):
         index = len(self.routes)
 
-        # see if we can update
-        for route in self.routes:
-            if route.destination == destination:
-                route.ports = list(set(route.ports).union(ports or []))
+        if destination in self.routes:
+            route = self.routes[destination]
 
-                if proxy:
-                    route.proxy = proxy
+            route.ports = list(set(route.ports).union(ports or []))
 
-                return route.is_valid()
+            if proxy:
+                route.proxy = proxy
+
+            return route.is_valid()
 
         # otherwise create
         route = Route(
@@ -66,17 +75,19 @@ class Config(object):
         )
 
         if route.is_valid():
-            self.routes.append(route)
+            self.routes[destination] = route
             return True
         else:
             return False
 
     def remove_route(self, destination):
-        for route in self.routes:
-            if route.destination == destination:
-                route.stop()
-                self.routes.remove(route)
-                return True
+        if destination in self.routes:
+            route = self.routes[destination]
+
+            route.stop()
+            del self.routes[destination]
+
+            return True
 
         return False
 
