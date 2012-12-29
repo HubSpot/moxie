@@ -30,7 +30,7 @@ def entry():
     if platform.system() in __platforms__:
         return main(docopt(__doc__, version=__version__))
     else:
-        print "Moxie wasn't designed to run on your system, sorry."
+        sys.stderr.write("Moxie wasn't designed to run on your system, sorry.")
         return 1
 
 if __name__ == '__main__':

@@ -45,19 +45,23 @@ class Config(object):
             return Config(routes, default_proxy, default_ports)
 
     def __init__(self, routes, default_proxy=None, default_ports=None):
-        self.routes = OrderedDict()
+        self.routes_by_destination = OrderedDict()
 
         for route in routes:
-            self.routes[route.destination] = route
+            self.routes_by_destination[route.destination] = route
 
         self.default_proxy = default_proxy
         self.default_ports = default_ports
 
-    def add_route(self, destination, ports=None, proxy=None):
-        index = len(self.routes)
+    @property
+    def routes(self):
+        return self.routes_by_destination.values()
 
-        if destination in self.routes:
-            route = self.routes[destination]
+    def add_route(self, destination, ports=None, proxy=None):
+        index = len(self.routes_by_destination)
+
+        if destination in self.routes_by_destination:
+            route = self.routes_by_destination[destination]
 
             route.ports = list(set(route.ports).union(ports or []))
 
@@ -75,17 +79,15 @@ class Config(object):
         )
 
         if route.is_valid():
-            self.routes[destination] = route
+            self.routes_by_destination[destination] = route
             return True
         else:
             return False
 
     def remove_route(self, destination):
-        if destination in self.routes:
-            route = self.routes[destination]
-
-            route.stop()
-            del self.routes[destination]
+        if destination in self.routes_by_destination:
+            self.routes_by_destination[destination].stop()
+            del self.routes_by_destination[destination]
 
             return True
 

@@ -1,4 +1,5 @@
 import os
+import sys
 import logging
 from termcolor import colored
 
@@ -30,11 +31,11 @@ def check_status(config):
 
             try:
                 if route.status(port):
-                    print "{0} {1}".format(aligned_host, colored('OK', 'green'))
+                    sys.stdout.write("{0} {1}".format(aligned_host, colored('OK', 'green')))
                 else:
-                    print "{0} {1}".format(aligned_host, "OFF")
+                    sys.stdout.write("{0} {1}".format(aligned_host, "OFF"))
             except MoxieException as e:
-                print "{0} {1} ({2})".format(aligned_host, colored('ISSUE', 'red'), e.message)
+                sys.stdout.write("{0} {1} ({2})".format(aligned_host, colored('ISSUE', 'red'), e.message))
 
     return 0
 
@@ -65,17 +66,17 @@ def stop_proxying(args, config):
 
 def add_destination(args, config):
     if not config.default_proxy and not args['--proxy']:
-        print "No proxy specified. Include a --proxy argument, or set a default proxy in your moxie config!"
+        sys.stderr.write("No proxy specified. Include a --proxy argument, or set a default proxy in your moxie config!")
         return 1
 
     if not config.default_ports and not args['<ports>']:
-        print "No ports specified. Include port(s) in the command line, or set default ports in your moxie config!"
+        sys.stderr.write("No ports specified. Include port(s) in the command line, or set default ports in your moxie config!")
         return 1
 
     try:
         int_ports = map(int, args['<ports>'])
     except:
-        print "Invalid ports: {0}".format(args['<ports>'])
+        sys.stderr.write("Invalid ports: {0}".format(args['<ports>']))
         return 1
 
     if len(args['--proxy']) > 0:
