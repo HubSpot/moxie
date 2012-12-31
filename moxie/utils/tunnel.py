@@ -1,9 +1,9 @@
 import os
 import logging
-from sh import pkill, ps
+from sh import kill, ps
 
-list_programs = ps.bake('-e', '-ww', '-o', 'command')
-term_program = pkill.bake('-term', '-f')
+term = kill.bake('-term')
+list_programs = ps.bake('-e', '-ww', '-o', 'pid,command')
 
 
 def generate_tunnel_command(local_address, port, host, proxy):
@@ -23,16 +23,18 @@ def status(local_address, port, host, proxy):
     command = generate_tunnel_command(local_address, port, host, proxy)
 
     for line in list_programs():
-        line = line.strip()
-        if line == command:
-            return True
+        pid, pcommand = line.strip().split(' ', 1)
+        if pcommand == command:
+            return int(pid)
 
-    return False
+    return None
 
 
 def stop(local_address, port, host, proxy):
-    if status(local_address, port, host, proxy):
-        term_program(generate_tunnel_command(local_address, port, host, proxy))
+    pid = status(local_address, port, host, proxy)
+
+    if pid:
+        term(pid)
         logging.debug("Stopped tunnel to %s", host)
     else:
         logging.debug("Tunnel already stopped")
