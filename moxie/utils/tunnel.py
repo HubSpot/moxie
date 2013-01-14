@@ -23,9 +23,11 @@ def status(local_address, port, host, proxy):
     command = generate_tunnel_command(local_address, port, host, proxy)
 
     for line in list_programs():
-        pid, pcommand = line.strip().split(' ', 1)
-        if pcommand == command:
-            return int(pid)
+        line = line.strip()
+        if ' ' in line:  # weird edge case where a process doesnt have a command
+            pid, pcommand = line.split(' ', 1)
+            if pcommand == command:
+                return int(pid)
 
     return None
 
