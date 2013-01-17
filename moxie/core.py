@@ -146,6 +146,8 @@ def main(args):
         return start_proxying(args, config)
     elif args['stop']:
         return stop_proxying(args, config)
+    elif args['restart']:
+        return stop_proxying(args, config) or start_proxying(args, config)
     else:
         sys.stderr.write("Nothing to do.\n")  # shit.
         return 1

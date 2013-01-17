@@ -4,6 +4,7 @@
 Usage:
   moxie start [<destinations>...] [options]
   moxie stop [<destinations>...] [options]
+  moxie restart [<destinations>...] [options]
   moxie status [options]
   moxie add <destination> [<ports>...] [--proxy=<proxy>] [options]
   moxie remove <destination> [options]
