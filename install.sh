@@ -17,7 +17,7 @@ fi
 cd $(dirname "$0")
 
 if [[ -e .venv ]]; then
-VENV=${cat .venv}
+    VENV=$(cat .venv)
 fi
 
 if [[ -z "$VENV" ]]; then
