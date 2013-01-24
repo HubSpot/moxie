@@ -149,7 +149,7 @@ This is moxie in a nutshell.
 
 ## I'd like to help out.
 
-Thanks! Please send all pull requests to tpetr@hubspot.com.
+Thanks! Please send all pull requests to [@tpetr](https://github.com/tpetr/) (tpetr@hubspot.com).
 
 ## Tested on
 
