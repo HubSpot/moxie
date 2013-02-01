@@ -8,6 +8,8 @@ Usage:
   moxie status [options]
   moxie add <destination> [<ports>...] [--proxy=<proxy>] [options]
   moxie remove <destination> [options]
+  moxie group <group> [<destinations>...]
+  moxie ungroup <group>
 
 Options:
   -c --config=<config>      Configuration file [default: ~/.moxie.yaml]

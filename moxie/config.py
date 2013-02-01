@@ -4,6 +4,7 @@ from contextlib import closing
 from ordereddict import OrderedDict
 
 from .route import Route
+from .group import Group
 
 
 def generate_address_from_index(index):
@@ -42,13 +43,29 @@ class Config(object):
                 if route.is_valid():
                     routes.append(route)
 
-            return Config(routes, default_proxy, default_ports)
+            groups = {}
+            for index, group in enumerate(data.get('groups', [])):
+                if not group.get('name') in groups:
+                    groups[group.get('name')] = group.get('destinations', [])
 
-    def __init__(self, routes, default_proxy=None, default_ports=None):
+            return Config(routes, groups, default_proxy, default_ports)
+
+    def __init__(self, routes, groups, default_proxy=None, default_ports=None):
         self.routes_by_destination = OrderedDict()
 
         for route in routes:
             self.routes_by_destination[route.destination] = route
+
+        self.groups_by_name = OrderedDict()
+
+        for name, destinations in groups.iteritems():
+            group = Group(
+                name=name,
+                routes=[self.routes_by_destination[destination] for destination in destinations]
+            )
+
+            if (group.is_valid()):
+                self.groups_by_name[group.name] = group
 
         self.default_proxy = default_proxy
         self.default_ports = default_ports
@@ -93,9 +110,35 @@ class Config(object):
 
         return False
 
+    @property
+    def groups(self):
+        return self.groups_by_name.values()
+
+    def create_or_update_group(self, name, destinations):
+
+        if name not in self.groups_by_name:
+            self.groups_by_name[name] = Group(name)
+
+        routes = self.groups_by_name[name].routes
+        for destination in destinations:
+            if destination in self.routes_by_destination:
+                routes.append(self.routes_by_destination[destination])
+
+        return True
+
+
+    def remove_group(self, name):
+        if group in self.groups_by_name:
+            del self.groups_by_name[name]
+
+            return True
+
+        return False
+
     def __getstate__(self):
         output = {
             'routes': [route.__getstate__() for route in self.routes],
+            'groups': [group.__getstate__() for group in self.groups]
         }
 
         defaults = {}

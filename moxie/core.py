@@ -110,6 +110,28 @@ def remove_destination(args, config):
         sys.stderr.write("Failed to remove route")
         return 1
 
+def create_or_update_group(args, config):
+    result = config.create_or_update_group(args['<group>'], args['<destinations>'])
+
+    if result:
+        config.save(os.path.expanduser(args['--config']))
+        sys.stderr.write('Added group')
+        return 0
+    else:
+        sys.stderr.write('Failed to create/update group')
+        return 1
+
+def remove_group(args, config):
+    result = config.remove_group(args['<group>'])
+
+    if result:
+        config.save(os.path.expanduser(args['--config']))
+        sys.stderr.write('Removed group')
+        return 0
+    else:
+        sys.stderr.write('Failed to remove group')
+        return 1
+
 
 def main(args):
     init_logging(args)
@@ -126,6 +148,10 @@ def main(args):
             sys.stderr.write("This command needs to be run as root.\n")
             return 1
         return remove_destination(args, config)
+    elif args['group']:
+        return create_or_update_group(args, config)
+    elif args['ungroup']:
+        return remove_group(args, config)
 
     # bail out if no routes configured
     if len(config.routes) == 0:
