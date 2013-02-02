@@ -41,6 +41,15 @@ def check_status(config):
 
 
 def start_proxying(args, config):
+    started_a_group = False
+
+    # look for specified groups
+    if args['<destinations>']:
+        for group in config.groups:
+            if group.name in args['<destinations>']:
+                group.start()
+                started_a_group = True
+
     # loop through configured routes
     for route in config.routes:
         # filter by destination hostname, if specified
@@ -53,6 +62,15 @@ def start_proxying(args, config):
 
 
 def stop_proxying(args, config):
+    stopped_a_group = False
+
+    # look for specified groups
+    if args['<destinations>']:
+        for group in config.groups:
+            if group.name in args['<destinations>']:
+                group.stop()
+                stopped_a_group = True
+
     # loop through configured routes
     for route in config.routes:
         # filter by destination hostname, if specified

@@ -17,19 +17,19 @@ class Group(object):
         return self.name and len(self.routes) >= 0
 
     def start(self):
-        for route in routes:
+        for route in self.routes:
             route.start()
 
     def status(self, port):
-        for route in routes:
+        for route in self.routes:
             route.status(port)
 
     def stop(self):
-        for route in routes:
+        for route in self.routes:
             route.stop()
 
     def __getstate__(self):
         return {
             'name': self.name,
-            'destinations': [route.destination for route in self.routes],
+            'destinations': list(set([route.destination for route in self.routes]))
         }

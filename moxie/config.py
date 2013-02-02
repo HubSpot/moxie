@@ -128,7 +128,7 @@ class Config(object):
 
 
     def remove_group(self, name):
-        if group in self.groups_by_name:
+        if name in self.groups_by_name:
             del self.groups_by_name[name]
 
             return True
