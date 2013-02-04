@@ -122,10 +122,10 @@ def remove_destination(args, config):
 
     if result:
         config.save(os.path.expanduser(args['--config']))
-        sys.stderr.write("Removed route")
+        sys.stderr.write("Removed route\n")
         return 0
     else:
-        sys.stderr.write("Failed to remove route")
+        sys.stderr.write("Failed to remove route\n")
         return 1
 
 def create_or_update_group(args, config):
@@ -133,10 +133,10 @@ def create_or_update_group(args, config):
 
     if result:
         config.save(os.path.expanduser(args['--config']))
-        sys.stderr.write('Added group')
+        sys.stderr.write('Added group\n')
         return 0
     else:
-        sys.stderr.write('Failed to create/update group')
+        sys.stderr.write('Failed to create/update group\n')
         return 1
 
 def remove_group(args, config):
@@ -144,10 +144,10 @@ def remove_group(args, config):
 
     if result:
         config.save(os.path.expanduser(args['--config']))
-        sys.stderr.write('Removed group')
+        sys.stderr.write('Removed group\n')
         return 0
     else:
-        sys.stderr.write('Failed to remove group')
+        sys.stderr.write('Failed to remove group\n')
         return 1
 
 
