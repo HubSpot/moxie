@@ -22,7 +22,7 @@ class Config(object):
     def load(cls, filename):
         # generate blank config if file does not exist
         if not os.path.exists(filename):
-            return Config([])
+            return Config()
 
         with closing(open(filename, 'r')) as fp:
             data = yaml.load(fp) or {}
@@ -50,7 +50,9 @@ class Config(object):
 
             return Config(routes, groups, default_proxy, default_ports)
 
-    def __init__(self, routes, groups, default_proxy=None, default_ports=None):
+    def __init__(self, routes=None, groups=None, default_proxy=None, default_ports=None):
+        routes = routes or []
+        groups = groups or []
         self.routes_by_destination = OrderedDict()
 
         for route in routes:
