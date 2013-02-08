@@ -52,7 +52,7 @@ class Config(object):
 
     def __init__(self, routes=None, groups=None, default_proxy=None, default_ports=None):
         routes = routes or []
-        groups = groups or []
+        groups = groups or {}
         self.routes_by_destination = OrderedDict()
 
         for route in routes:
