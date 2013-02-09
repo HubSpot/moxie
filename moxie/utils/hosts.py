@@ -1,5 +1,6 @@
 import logging
 from contextlib import closing
+from ..decorators import requires_root
 
 HOSTS_BEGIN = '### BEGIN MOXIE HOSTS'
 HOSTS_END = '### END MOXIE HOSTS'
@@ -36,6 +37,7 @@ def get(domain):
     return get_moxie_domains().get(domain)
 
 
+@requires_root("sudo moxie hosts add {0} {1}")
 def set(domain, address):
     if get(domain) != address:
         lines_to_write = []
@@ -88,6 +90,7 @@ def set(domain, address):
         logging.debug("Domain '%s' already maps to '%s'", domain, get(domain))
 
 
+@requires_root("sudo moxie hosts remove {0}")
 def remove(domain):
     lines_to_write = []
     inside_moxie_hosts = False
