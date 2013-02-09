@@ -15,7 +15,7 @@ setup(name='moxie-proxy',
         'PyYAML==3.10',
         'docopt==0.5.0',
         'termcolor==1.1.0',
-        'sh==1.07',
+        'sh==1.08',
         'ordereddict==1.1',
     ],
     entry_points={
