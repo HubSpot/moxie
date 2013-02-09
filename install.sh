@@ -31,13 +31,14 @@ if [[ "$?" -ne "0" ]]; then
     exit 1
 fi
 
-pip install -r requirements.pip
+pip install -U -r requirements.pip
 
 if [[ "$?" -ne "0" ]]; then
     echo "ERROR: failed to install dependencies"
     exit 1
 fi
 
+echo "Symlinking /usr/bin/moxie to $VIRTUAL_ENV/bin/moxie (requires sudo)"
 sudo ln -sf $VIRTUAL_ENV/bin/moxie /usr/bin/moxie
 
 if [[ "$?" -ne "0" ]]; then
