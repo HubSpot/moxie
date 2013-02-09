@@ -1,6 +1,7 @@
 import re
 import logging
 from sh import ifconfig
+from ...decorators import requires_root
 
 from . import launchd
 
@@ -22,6 +23,7 @@ def list_addresses():
     return addresses
 
 
+@requires_root("sudo moxie alias add {0}")
 def add(address, survive_reboot=True):
     if address not in list_addresses():
         add_lo0_alias(address)
@@ -32,7 +34,10 @@ def add(address, survive_reboot=True):
     if survive_reboot:
         launchd.add_run_once(address, ['/sbin/ifconfig', 'lo0', 'alias', address])
 
+    return 0
 
+
+@requires_root("sudo moxie alias remove {0}")
 def remove(address):
     if address in list_addresses():
         remove_lo0_alias(address)
@@ -41,3 +46,5 @@ def remove(address):
         logging.debug("Loopback address '%s' does not exist", address)
 
     launchd.remove_run_once(address)
+
+    return 0

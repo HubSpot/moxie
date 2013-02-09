@@ -5,10 +5,8 @@ from termcolor import colored
 
 from .config import Config
 from .exceptions import MoxieException
-
-
-def is_root():
-    return os.getuid() == 0
+from .utils.osx import loopback
+from .utils import hosts
 
 
 def init_logging(args):
@@ -124,6 +122,7 @@ def remove_destination(args, config):
         sys.stderr.write("Failed to remove route\n")
         return 1
 
+
 def create_or_update_group(args, config):
     result = config.create_or_update_group(args['<group>'], args['<destinations>'])
 
@@ -134,6 +133,7 @@ def create_or_update_group(args, config):
     else:
         sys.stderr.write('Failed to create/update group\n')
         return 1
+
 
 def remove_group(args, config):
     result = config.remove_group(args['<group>'])
@@ -157,10 +157,6 @@ def main(args):
     if args['add']:
         return add_destination(args, config)
     elif args['remove']:
-        # removing a route requires root, since we might be shutting things down.
-        if not is_root():
-            sys.stderr.write("This command needs to be run as root.\n")
-            return 1
         return remove_destination(args, config)
     elif args['group']:
         return create_or_update_group(args, config)
@@ -176,11 +172,6 @@ def main(args):
     if args['status']:
         return check_status(config)
 
-    # all other commands require root, check for it
-    if not is_root():
-        sys.stderr.write("This command needs to be run as root.\n")
-        return 1
-
     # handle other commands
     if args['start']:
         return start_proxying(args, config)
@@ -188,6 +179,30 @@ def main(args):
         return stop_proxying(args, config)
     elif args['restart']:
         return stop_proxying(args, config) or start_proxying(args, config)
-    else:
-        sys.stderr.write("Nothing to do.\n")  # shit.
-        return 1
+
+    sys.stderr.write("Nothing to do.\n")  # shit.
+    return 1
+
+
+def alias_cmd(args):
+    if args['add']:
+        loopback.add(args['<address>'])
+        return 0
+    elif args['remove']:
+        loopback.remove(args['<address>'])
+        return 0
+
+    sys.stderr.write("Nothing to do.\n")
+    return 1
+
+
+def hosts_cmd(args):
+    if args['add']:
+        hosts.set(args['<domain>'], args['<address>'])
+        return 0
+    elif args['remove']:
+        hosts.remove(args['<domain>'])
+        return 0
+
+    sys.stderr.write("Nothing to do.\n")
+    return 1
