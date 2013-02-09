@@ -1,5 +1,6 @@
 import yaml
 import os
+import logging
 from contextlib import closing
 from ordereddict import OrderedDict
 
@@ -42,6 +43,8 @@ class Config(object):
 
                 if route.is_valid():
                     routes.append(route)
+                else:
+                    logging.warn('Invalid route: destination=%s, ports=%s, proxy=%s' % (str(route.destination), str(route.ports), str(route.proxy)))
 
             groups = {}
             for index, group in enumerate(data.get('groups', [])):
