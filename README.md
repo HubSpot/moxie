@@ -1,6 +1,6 @@
 # moxie: A TCP proxy guaranteed to make you smile.
 
-v0.2
+v0.3
 
 ## What is it?
 
